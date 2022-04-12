@@ -12,7 +12,7 @@ class BasicJunitTests extends AbstractTest {
     @Order(2)
     @RepeatedTest(5)
     void test(RepetitionInfo info) {
-        System.out.println(info.getCurrentRepetition());
+        System.out.println(Thread.currentThread().getName());
     }
 
     @Order(1)
