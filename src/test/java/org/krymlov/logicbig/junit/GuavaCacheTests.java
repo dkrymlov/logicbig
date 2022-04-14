@@ -1,51 +1,33 @@
 package org.krymlov.logicbig.junit;
 
-import com.google.common.cache.*;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.junit.jupiter.api.*;
+import org.krymlov.logicbig.AbstractTest;
 import org.krymlov.logicbig.guava.Human;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 
-public class GuavaCacheTests {
-
-    private static Cache<Integer, Human> cache = CacheBuilder.newBuilder()
-            .initialCapacity(5)
-            .concurrencyLevel(5)
-            .maximumSize(5)
-            .build();
-
-    static int index = 0;
-    static long timeMillis;
-    static ConcurrentMap<Integer, Human> humans = new ConcurrentHashMap<>();
+public class GuavaCacheTests extends AbstractTest {
+    static LoadingCache<Integer, Human> cache;
 
     @BeforeAll
-    static void beforeAll(){
-        initMap();
-        cache.asMap().putAll(humans);
+    static void beforeAll() {
+        CacheLoader<Integer, Human> loader = new CacheLoader<>() {
+            @Override
+            public Human load(Integer age) {
+                Human human = new Human(age, "Name" + age);
+                System.out.println(human);
+                return human;
+            }
+        };
 
-        System.out.println("Entities in actual map : " + humans);
-        System.out.println("Entities in cache : " + cache.asMap());
-
-        timeMillis = System.currentTimeMillis();
+        cache = CacheBuilder.newBuilder().build(loader);
     }
 
-    @AfterAll
-    static void afterAll(){
-        long l = System.currentTimeMillis() - timeMillis;
-        System.out.println("Tests working time is " + l + " millis");
-        System.out.println("Entities in cache after accessing : " + cache.asMap());
-    }
-
-    static void initMap(){
-        humans.put(++index, new Human(19, "Danil"));
-        humans.put(++index,new Human(23, "David"));
-        humans.put(++index,new Human(20, "Taya"));
-        humans.put(++index,new Human(17, "Stasya"));
-        humans.put(++index,new Human(19, "Nikita"));
-    }
-
-    <T> T getAndClear(Integer key, Cache<Integer, T> cache){
+    <T> T getAndClear(Integer key, Cache<Integer, T> cache) {
         T object = cache.asMap().get(key);
         cache.asMap().remove(key);
         return object;
@@ -53,8 +35,18 @@ public class GuavaCacheTests {
 
     @Order(2)
     @RepeatedTest(5)
-    void test(RepetitionInfo info) throws InterruptedException {
-        Assertions.assertEquals(humans.get(info.getCurrentRepetition()), getAndClear(info.getCurrentRepetition(), cache));
+    void test1(RepetitionInfo info) throws ExecutionException {
+        Human human1 = cache.get(info.getCurrentRepetition());
+        Human human2 = cache.get(info.getCurrentRepetition());
+        Assertions.assertTrue(human1 == human2);
+    }
+
+    @Order(2)
+    @RepeatedTest(5)
+    void test2(RepetitionInfo info) throws ExecutionException {
+        Human human1 = cache.get(info.getCurrentRepetition());
+        Human human2 = cache.get(info.getCurrentRepetition());
+        Assertions.assertTrue(human1 == human2);
     }
 
 }

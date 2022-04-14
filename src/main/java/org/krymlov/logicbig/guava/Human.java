@@ -41,4 +41,13 @@ public class Human {
     public boolean isAlive() {
         return isAlive;
     }
+
+    @Override
+    public String toString() {
+        return "Human{" +
+                "age=" + age +
+                ", name='" + name + '\'' +
+                ", isAlive=" + isAlive +
+                '}';
+    }
 }
