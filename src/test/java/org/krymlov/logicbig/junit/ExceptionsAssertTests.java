@@ -9,6 +9,9 @@ import org.krymlov.logicbig.exception.DividerException;
 
 public class ExceptionsAssertTests extends AbstractTest {
 
+    class CustomException extends Throwable {
+    }
+
     @Test
     void test(){
         Exception exception = Assertions.assertThrows(DividerException.class, () -> Divider.divide(1, 0));
@@ -16,6 +19,19 @@ public class ExceptionsAssertTests extends AbstractTest {
         String actualMessage = exception.getMessage();
         System.out.println(actualMessage);
         Assertions.assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void test1() throws CustomException {
+        try {
+            throw new CustomException();
+        } catch (RuntimeException re){
+            re.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        } catch (Error er){
+            er.printStackTrace();
+        }
     }
 
 }
